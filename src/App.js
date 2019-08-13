@@ -1,26 +1,78 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import Controls from './components/Controls/Controls'
+import Display from './components/Display'
+import DrumPads from './components/DrumPads/DrumPads'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+export default class App extends React.Component {
+  state = {
+    key: '',
+    display: '',
+    power: true,
+    volume: 0.5,
+  }
+  
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyPress);
+  }
+  
+  handleKeyPress = (e) => {
+    let key = document.getElementById(e.key.toUpperCase())
+    if (key !== null) {
+      document.getElementById(e.key.toUpperCase()).parentNode.focus()
+      document.activeElement.click()
+    }
+  }
+  
+  setDisplayName = (displayText) => {
+    this.setState({
+      display: displayText
+    })
+  }
+  
+  changeVolume = (e) => {
+    this.setState({
+      display: `Volume: ${Math.round(e.target.value * 100)}`,
+      volume: e.target.value,
+    })
+    Array.from(document.getElementsByClassName('clip')).forEach((sound) => sound.volume = e.target.value)
+    setTimeout(() => this.setState({
+      display: ''
+    }), 1000)
+  }
+  
+  togglePower = () => {
+    if (this.state.power) {
+      this.setState({
+        display: ''
+      })
+    }
+    this.setState({
+      power: !this.state.power
+    })
+  }
+  
+  render() {
+    return(
+      <div 
+        id='drum-machine'
+        className={this.state.power ? 'powerOn' : 'powerOff'}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+        <Controls 
+          changeVolume={this.changeVolume}
+          togglePower={this.togglePower}
+          powerOn={this.state.power}
+          volume={this.state.volume}
+          />
+        <Display 
+          text={this.state.display}
+          />
+        <DrumPads 
+          pressedKey={this.state.key}
+          setDisplayName={this.setDisplayName}
+          powerOn={this.state.power}
+          volume={this.state.volume}
+          />
+      </div>
+    )
+  }
 }
-
-export default App;
